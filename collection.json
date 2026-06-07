@@ -1,0 +1,225 @@
+{
+  "info": {
+    "_postman_id": "yapindo-task-management-id",
+    "name": "Yapindo Task Management API",
+    "description": "Koleksi API untuk Technical Test Backend Developer di PT Yapindo Jaya Abadi",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register Akun",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Admin10\",\n  \"email\": \"admin1@mail.com\",\n  \"password\": \"Password123!\",\n  \"role\": \"ADMIN\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@mail.com\",\n  \"password\": \"Password123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "login"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Project",
+      "item": [
+        {
+          "name": "Buat Project",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Project Utama Yapindo\",\n  \"description\": \"Pengembangan backend core system\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/projects",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects"]
+            }
+          }
+        },
+        {
+          "name": "Ambil Semua Project",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/projects",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects"]
+            }
+          }
+        },
+        {
+          "name": "Ambil Project By ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/projects/6",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects", "6"]
+            }
+          }
+        },
+        {
+          "name": "Update Project",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Testing Project\",\n  \"description\": \"Project sudah diupdate via PUT\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/projects/2",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects", "2"]
+            }
+          }
+        },
+        {
+          "name": "Delete Project",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url}}/api/projects/2",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects", "2"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Task",
+      "item": [
+        {
+          "name": "Ambil Semua Tugas",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/tasks",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tasks"]
+            }
+          }
+        },
+        {
+          "name": "Ambil Tugas By ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/tasks/4",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tasks", "4"]
+            }
+          }
+        },
+        {
+          "name": "Ambil Tugas di Suatu Project",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/projects/6/tasks",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects", "6", "tasks"]
+            }
+          }
+        },
+        {
+          "name": "Update Tugas",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Task Title\",\n  \"description\": \"Task sudah diupdate via PUT\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/tasks/18",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tasks", "18"]
+            }
+          }
+        },
+        {
+          "name": "Delete Tugas",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url}}/api/tasks/17",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tasks", "17"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "AI",
+      "item": [
+        {
+          "name": "Post AI Command",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"prompt\": \"Tolong buatkan task baru di project ID 6 dengan judul 'Fix Login Bug', assign ke user ID 3. Terus sekalian ubah status task ID 18 jadi 'done'.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/ai/command",
+              "host": ["{{base_url}}"],
+              "path": ["api", "ai", "command"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  }
+}
