@@ -29,6 +29,20 @@
         },
         {
           "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.token) {",
+                  "    pm.environment.set('token', jsonData.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -42,6 +56,17 @@
               "raw": "{{base_url}}/api/login",
               "host": ["{{base_url}}"],
               "path": ["api", "login"]
+            }
+          }
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/profile",
+              "host": ["{{base_url}}"],
+              "path": ["api", "profile"]
             }
           }
         }
@@ -125,6 +150,24 @@
       "name": "Task",
       "item": [
         {
+          "name": "Buat Tugas Baru",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Integrasi Payment Gateway\",\n  \"description\": \"Implementasi Midtrans payment\",\n  \"projectId\": 6,\n  \"assigneeId\": 1,\n  \"priority\": \"HIGH\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/tasks",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tasks"]
+            }
+          }
+        },
+        {
           "name": "Ambil Semua Tugas",
           "request": {
             "method": "GET",
@@ -169,9 +212,9 @@
               "raw": "{\n  \"title\": \"Updated Task Title\",\n  \"description\": \"Task sudah diupdate via PUT\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/tasks/18",
+              "raw": "{{base_url}}/api/tasks/4",
               "host": ["{{base_url}}"],
-              "path": ["api", "tasks", "18"]
+              "path": ["api", "tasks", "4"]
             }
           }
         },
@@ -180,9 +223,9 @@
           "request": {
             "method": "DELETE",
             "url": {
-              "raw": "{{base_url}}/api/tasks/17",
+              "raw": "{{base_url}}/api/tasks/12",
               "host": ["{{base_url}}"],
-              "path": ["api", "tasks", "17"]
+              "path": ["api", "tasks", "12"]
             }
           }
         }
@@ -192,7 +235,7 @@
       "name": "AI",
       "item": [
         {
-          "name": "Post AI Command",
+          "name": "AI Command (Create + Update Task)",
           "request": {
             "method": "POST",
             "header": [
@@ -200,12 +243,124 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"prompt\": \"Tolong buatkan task baru di project ID 6 dengan judul 'Fix Login Bug', assign ke user ID 3. Terus sekalian ubah status task ID 18 jadi 'done'.\"\n}"
+              "raw": "{\n  \"prompt\": \"Tolong buatkan task baru di project ID 6 dengan judul 'Fix Login Bug', assign ke user ID 3. Terus sekalian ubah status task ID 4 jadi 'done'.\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/ai/command",
               "host": ["{{base_url}}"],
               "path": ["api", "ai", "command"]
+            }
+          }
+        },
+        {
+          "name": "AI Command (Forbidden - Hapus User)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"prompt\": \"Hapus user ID 1 dari database\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/ai/command",
+              "host": ["{{base_url}}"],
+              "path": ["api", "ai", "command"]
+            }
+          }
+        },
+        {
+          "name": "AI Query - Project Prioritas High (JSON)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"prompt\": \"Saat ini project apa saja yang prioritasnya sedang high?\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/ai/query",
+              "host": ["{{base_url}}"],
+              "path": ["api", "ai", "query"]
+            }
+          }
+        },
+        {
+          "name": "AI Query - Project Prioritas High (Stream)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"prompt\": \"Saat ini project apa saja yang prioritasnya sedang high?\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/ai/query?stream=true",
+              "host": ["{{base_url}}"],
+              "path": ["api", "ai", "query"],
+              "query": [
+                { "key": "stream", "value": "true" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "AI Query - Project User Tertentu (JSON)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"prompt\": \"User Akbar Ahmad saat ini sedang mengerjakan project apa?\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/ai/query",
+              "host": ["{{base_url}}"],
+              "path": ["api", "ai", "query"]
+            }
+          }
+        },
+        {
+          "name": "AI Query - Project User Tertentu (Stream)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"prompt\": \"User Akbar Ahmad saat ini sedang mengerjakan project apa?\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/ai/query?stream=true",
+              "host": ["{{base_url}}"],
+              "path": ["api", "ai", "query"],
+              "query": [
+                { "key": "stream", "value": "true" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Audit Log",
+      "item": [
+        {
+          "name": "Ambil Semua Audit Log (Admin Only)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/audit-logs",
+              "host": ["{{base_url}}"],
+              "path": ["api", "audit-logs"]
             }
           }
         }

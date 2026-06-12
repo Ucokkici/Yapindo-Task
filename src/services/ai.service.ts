@@ -12,6 +12,78 @@ const executeFallbackEngine = (prompt: string) => {
   const responsePayload: { actions: any[] } = { actions: [] };
 
   const normalizedPrompt = prompt.toLowerCase();
+
+  // --- Detect USER modification prompts first (FORBIDDEN) ---
+  const userModifyKeywords = ["hapus", "delete", "ubah", "update", "ganti", "remove", "buang"];
+  const userTargetKeywords = ["user", "admin", "pengguna", "akun"];
+  const hasModifyIntent = userModifyKeywords.some((k) => normalizedPrompt.includes(k));
+  const hasUserTarget = userTargetKeywords.some((k) => normalizedPrompt.includes(k));
+
+  if (hasModifyIntent && hasUserTarget) {
+    responsePayload.actions.push({
+      type: "MODIFY_USER",
+      data: { prompt },
+    });
+    return responsePayload;
+  }
+
+  // --- Detect QUERY-type prompts first (read-only) ---
+  if (
+    (normalizedPrompt.includes("prioritas") &&
+      normalizedPrompt.includes("high")) ||
+    (normalizedPrompt.includes("priority") &&
+      normalizedPrompt.includes("high")) ||
+    normalizedPrompt.includes("high priority") ||
+    normalizedPrompt.includes("prioritas tinggi")
+  ) {
+    responsePayload.actions.push({
+      type: "QUERY_HIGH_PRIORITY_PROJECTS",
+      data: {},
+    });
+    return responsePayload;
+  }
+
+  if (
+    normalizedPrompt.includes("mengerjakan project") ||
+    normalizedPrompt.includes("mengerjakan proyek") ||
+    normalizedPrompt.includes("working on") ||
+    normalizedPrompt.includes("dikerjakan oleh") ||
+    (normalizedPrompt.includes("user") &&
+      normalizedPrompt.includes("project")) ||
+    (normalizedPrompt.includes("user") && normalizedPrompt.includes("proyek"))
+  ) {
+    // Extract user name from prompt
+    let userName = "";
+    let userId: number | undefined;
+
+    // Try to match: "User <Name> ..." or "user <Name> ..."
+    const userNameMatch = prompt.match(
+      /[Uu]ser\s+([A-Za-z\s]+?)(?:\s+saat|\s+sedang|\s+mengerjakan|\s+working|\s+lagi|\?|$)/,
+    );
+    if (userNameMatch && userNameMatch[1]) {
+      userName = userNameMatch[1].trim();
+    }
+
+    // Try to match user ID: "user id 5", "user 5"
+    const userIdMatch = normalizedPrompt.match(
+      /user\s*(?:id)?\s*(\d+)/,
+    );
+    if (userIdMatch && userIdMatch[1]) {
+      userId = Number(userIdMatch[1]);
+      userName = "";
+    }
+
+    responsePayload.actions.push({
+      type: "QUERY_USER_PROJECTS",
+      data: {
+        ...(userName ? { userName } : {}),
+        ...(userId ? { userId } : {}),
+      },
+    });
+    return responsePayload;
+  }
+
+  // --- Original command-type prompt processing ---
   const sentences = normalizedPrompt.split(
     /terus|sekalian|kemudian|lalu|dan|(?:\.\s+)/,
   );
@@ -141,7 +213,21 @@ const executeFallbackEngine = (prompt: string) => {
 };
 
 export const generateAIResponse = async (prompt: string) => {
-  const systemPrompt = `You are an AI converting text to JSON array of actions. CREATE_TASK, UPDATE_TASK, DELETE_TASK only. JSON format.`;
+  const systemPrompt = `You are an AI that converts natural language text into a JSON object with an "actions" array.
+
+Supported action types:
+1. CREATE_TASK — create a new task. Data: { title, projectId, assigneeId, priority, description, status }
+2. UPDATE_TASK — update an existing task. Data: { taskId, status }
+3. DELETE_TASK — delete an existing task. Data: { taskId }
+4. QUERY_HIGH_PRIORITY_PROJECTS — query all projects that have tasks with HIGH priority. Data: {} (no parameters needed)
+5. QUERY_USER_PROJECTS — query all projects a specific user is working on. Data: { userName?: string, userId?: number }
+
+Rules:
+- If the user asks about projects with high priority, use QUERY_HIGH_PRIORITY_PROJECTS.
+- If the user asks what projects a certain user is working on, use QUERY_USER_PROJECTS with the user's name or ID.
+- NEVER generate actions that modify the User table (no CREATE_USER, DELETE_USER, UPDATE_USER, etc.).
+- Always respond with valid JSON in this format: { "actions": [...] }
+- Do NOT include any text outside the JSON object.`;
 
   try {
     const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
@@ -173,7 +259,14 @@ export const generateAIResponse = async (prompt: string) => {
     if (firstBrace !== -1 && lastBrace !== -1)
       text = text.substring(firstBrace, lastBrace + 1);
 
-    return JSON.parse(text.trim());
+    const parsed = JSON.parse(text.trim());
+
+    // Validate that parsed result has actions array
+    if (!parsed.actions || !Array.isArray(parsed.actions)) {
+      return executeFallbackEngine(prompt);
+    }
+
+    return parsed;
   } catch (error: any) {
     return executeFallbackEngine(prompt);
   }
